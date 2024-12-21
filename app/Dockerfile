@@ -1,21 +1,21 @@
-# Dockerfile
+# Use the official Python image
 FROM python:3.9-slim
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only the requirements file to leverage Docker's caching mechanism
+COPY app/requirements.txt /app/requirements.txt
 
-# Copy the rest of the application code
-COPY . .
+# Install dependencies
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements.txt
 
-# Explicitly copy the outputs directory
-COPY outputs /app/outputs
+# Copy the entire application code to the container
+COPY app /app
 
-# Expose the port for FastAPI
+# Expose port 8000 for the FastAPI app
 EXPOSE 8000
 
-# Command to run the FastAPI app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run the FastAPI app with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
